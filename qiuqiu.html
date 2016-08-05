@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+	<title></title>
+	<style>
+	*{padding: 0;margin: 0;}
+	html,body{
+		width: 100%;height: 100%;overflow: hidden;
+	}
+		.pos{
+			position: absolute;
+			border-radius: 50%;
+			width: 50px;height: 50px;
+			background: red;
+			left: 10px;
+			top: 10px;
+		}
+		#dom{
+			z-index: 999;
+			cursor: none;
+			top: 20px;
+			
+		}
+		.fen{
+			-webkit-user-select: none;
+		}
+	</style>
+</head>
+<body>
+</body>
+<p class="fen">您的得分是:<span id="fen">0</span></p>
+<div class="pos" id="dom"></div>
+<script>
+	var Mouse={x:0,y:0},boxMouse={x:0,y:0},ttt;
+	var n = 0;
+	var drag=function(ele){
+		this.ele= document.querySelector(ele);
+		this.init();
+		
+	}
+	drag.prototype={
+		init:function(){
+			this.down();
+			
+		},
+		down:function(){
+			var that = this;
+			this.ele.addEventListener("mousedown",function(e){
+				Mouse.x = e.pageX;
+				Mouse.y = e.pageY;
+				boxMouse.x = Mouse.x-that.ele.offsetLeft;
+				boxMouse.y = Mouse.y-that.ele.offsetTop;
+				that.move();
+				that.up();
+				ttt=that;
+			})
+		},
+		move:function(){
+			var that = this;
+			/*document.addEventListener("mousemove", function(){
+				that.mousemove();
+			} );*/
+			document.addEventListener( "mousemove" , this.mousemoves ,false);
+		},
+		up:function(){
+			var that = this;
+			ttt=null;
+			document.addEventListener("mouseup",function(){
+				document.removeEventListener("mousemove", that.mousemoves ,false);
+			})
+		},
+		mousemoves:function(e){
+			var xx = e.pageX-boxMouse.x,
+				yy = e.pageY-boxMouse.y;
+				ttt.ele.style.left=xx+"px";
+				ttt.ele.style.top=yy+"px";
+		}
+	}
+
+	var qiu1 = new drag("#dom");
+
+
+
+	var qiu = function(w,h,x,y,color,speed){
+		this.w = w;
+		this.h = h;
+		this.x = x;
+		this.y = y;
+		this.color = color;
+		this.speed=  speed;
+		this.init();
+		this.reque();
+	}
+	qiu.prototype={
+		init:function(){
+			this.ele = document.createElement("div");
+			this.ele.style.cssText="width:"+this.w+"px;height:"+this.h+"px;left:"+this.x+"px;top:"+this.y+"px;background:"+this.color+";";
+			this.ele.className="pos";
+			document.body.appendChild(this.ele);
+		},
+		reque:function(){
+			var that = this;
+			var xx = radom(-5,5);
+			var yy = radom(-5,5);
+			setInterval(function(){
+				that.y += yy;
+				that.x += xx;
+				if(that.x<=0){
+					xx = -xx;
+				}else if(that.x>=window.innerWidth-that.w){
+					xx = -xx;
+				}
+				if(that.y<=0){
+					yy = -yy;
+				}else if(that.y>=window.innerHeight-that.h){
+					yy = -yy;
+				}
+				that.fuzhi();
+				var oxx = (that.ele.offsetLeft+that.ele.offsetHeight/2) - (qiu1.ele.offsetLeft+qiu1.ele.offsetHeight/2);
+				var oyy = (that.ele.offsetTop+that.ele.offsetHeight/2) - (qiu1.ele.offsetTop+qiu1.ele.offsetHeight/2);
+				var ozz = that.ele.offsetHeight/2 + qiu1.ele.offsetHeight/2;
+				if(Math.pow(oxx,2)+Math.pow(oyy,2)<=Math.pow(ozz,2)){
+					alert("您的得分是"+n);
+					location.reload()
+				}
+				//console.log( (that.ele.offsetLeft+that.ele.offsetHeight/2) - (qiu1.ele.offsetLeft+qiu1.ele.offsetHeight/2) )  
+				//console.log((qiu1.ele.offsetLeft+qiu1.ele.offsetHeight/2)+"."+(qiu1.ele.offsetTop+qiu1.ele.offsetHeight/2))
+			},20);
+		},
+		fuzhi:function(){
+			this.ele.style.cssText="width:"+this.w+"px;height:"+this.h+"px;left:"+this.x+"px;top:"+this.y+"px;background:"+this.color+";";
+		}
+	}
+	var obj = ["red","blue","pink","yellow","green","#c00","#0c0","#00c","#cc0","#c0c","#0cc","#CC9933","#9900CC","#99FFCC","#0099FF","#FFCCFF","#FF00FF","#CC0000","#cccccc","#CC66FF","#666699"];
+	
+	document.addEventListener("keydown",function(e){
+		
+		var fen = document.querySelector("#fen");
+		setInterval(function(){
+			n++;
+			fen.innerHTML=n;
+		},1000);
+		if(e.keyCode==13||e.keyCode==32){
+			for(var i=0;i<80;i++){
+				var ww = radom(200,40);
+				var x = radom(window.innerWidth-ww,0);
+				var y = radom(window.innerHeight-ww,0);
+				var color = obj[radom(obj.length,0)-1];
+				new qiu(ww,ww,x,y,color);
+			}
+		}
+		
+	},false);
+	
+	function radom(max,min){
+		var num = Math.floor(Math.random()*(max-min))+min;
+		if(num == 0){
+			num = radom(max,min);
+		}
+			return num;
+		
+	}
+</script>
+</html>
